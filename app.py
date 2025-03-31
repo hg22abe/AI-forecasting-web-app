@@ -22,29 +22,41 @@ def create_app(test_config=None):
     model_path = os.path.join(app.instance_path, 'AI_forecasting_model.keras')
     print(f"Model path: {model_path}")
 
-    model = load_model(model_path)
+    model = load_model(model_path)  
 
     @app.route('/', methods=("GET",))
     def welcome():
         return render_template('input.html')
     
-    @app.route('/predict', methods=("POST",))
+    @app.route('/predict', methods=["POST"])
     def predict():
         try:
             data = request.get_json()
 
-            if data is None or 'features' not in data:
-                return jsonify({"error": "No input features provided"}), 400
+            if not data:
+                return jsonify({"error": "No data received"}), 400
 
-            features = np.array(data['features']).reshape(1, -1)  
+            features = data.get('features')
 
-            prediction = model.predict(features)
+            if not features or len(features) != 5:
+                return jsonify({"error": "Expected 5 input features: [Close, High, Low, Open, Volume]"}), 400
+
+            single_input = np.array(features).reshape(1, 5)  
+
+            repeated_sequence = np.repeat(single_input, repeats=30, axis=0)  
+
+            model_input = repeated_sequence.reshape(1, 30, 5)
+
+            print(f"Model input shape: {model_input.shape}")
+
+            prediction = model.predict(model_input)
 
             return jsonify({
-                "prediction": prediction.tolist()  
+                "prediction": prediction.tolist()
             })
 
         except Exception as e:
+            print(f"Prediction error: {str(e)}")  # Debug server-side error
             return jsonify({"error": str(e)}), 500
    
     return app

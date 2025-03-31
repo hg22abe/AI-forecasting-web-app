@@ -1,78 +1,91 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-gray-100">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Model Prediction</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="h-full flex items-center justify-center">
-    <div class="bg-white shadow-lg rounded-xl p-8 max-w-lg w-full space-y-6">
-      <h1 class="text-3xl font-bold text-center text-gray-800">Welcome to the stock market prediction forecaster</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Price Prediction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full flex items-center justify-center">
+  <div class="bg-white shadow-lg rounded-xl p-8 max-w-lg w-full space-y-6">
+    <h1 class="text-3xl font-bold text-center text-gray-800">Stock Price Prediction</h1>
 
-      <form id="prediction-form" class="space-y-4">
-        <div>
-          <label for="feature1" class="block text-sm font-medium text-gray-700">Feature 1</label>
-          <input type="number" name="feature1" id="feature1" required
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
-        </div>
-        <div>
-          <label for="feature2" class="block text-sm font-medium text-gray-700">Feature 2</label>
-          <input type="number" name="feature2" id="feature2" required
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
-        </div>
-        <div>
-          <label for="feature3" class="block text-sm font-medium text-gray-700">Feature 3</label>
-          <input type="number" name="feature3" id="feature3" required
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
-        </div>
+    <form id="prediction-form" class="space-y-4">
+      <div>
+        <label for="close" class="block text-sm font-medium text-gray-700">Close Price</label>
+        <input type="number" step="any" name="close" id="close" required
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
+      </div>
 
+      <div>
+        <label for="high" class="block text-sm font-medium text-gray-700">High Price</label>
+        <input type="number" step="any" name="high" id="high" required
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
+      </div>
 
-        <button type="submit"
-          class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
-          Predict
-        </button>
-      </form>
+      <div>
+        <label for="low" class="block text-sm font-medium text-gray-700">Low Price</label>
+        <input type="number" step="any" name="low" id="low" required
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
+      </div>
 
-      <!-- Prediction Result -->
-      <div id="prediction-result" class="text-center text-lg font-semibold text-gray-800"></div>
-    </div>
+      <div>
+        <label for="open" class="block text-sm font-medium text-gray-700">Open Price</label>
+        <input type="number" step="any" name="open" id="open" required
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
+      </div>
 
-    <script>
-      const form = document.getElementById('prediction-form');
-      const resultDiv = document.getElementById('prediction-result');
+      <div>
+        <label for="volume" class="block text-sm font-medium text-gray-700">Volume</label>
+        <input type="number" step="any" name="volume" id="volume" required
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-indigo-200" />
+      </div>
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+      <button type="submit"
+        class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+        Predict
+      </button>
+    </form>
 
-        // Gather form inputs into an array
-        const features = [
-          parseFloat(document.getElementById('feature1').value),
-          parseFloat(document.getElementById('feature2').value),
-          parseFloat(document.getElementById('feature3').value),
-          // Add more features here if needed
-        ];
+    <div id="prediction-result" class="text-center text-lg font-semibold text-gray-800"></div>
+  </div>
 
-        try {
-          const response = await fetch('/predict', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ features: features }),
-          });
+  <script>
+    const form = document.getElementById('prediction-form');
+    const resultDiv = document.getElementById('prediction-result');
 
-          const result = await response.json();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-          if (response.ok) {
-            resultDiv.innerHTML = `Prediction: <span class="text-indigo-600">${result.prediction}</span>`;
-          } else {
-            resultDiv.innerHTML = `<span class="text-red-500">Error: ${result.error}</span>`;
-          }
-        } catch (error) {
-          resultDiv.innerHTML = `<span class="text-red-500">Error: ${error.message}</span>`;
+      const features = [
+        parseFloat(document.getElementById('close').value),
+        parseFloat(document.getElementById('high').value),
+        parseFloat(document.getElementById('low').value),
+        parseFloat(document.getElementById('open').value),
+        parseFloat(document.getElementById('volume').value),
+      ];
+
+      console.log('Sending features:', features); 
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ features: features }),
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          resultDiv.innerHTML = `Prediction: <span class="text-indigo-600">${result.prediction}</span>`;
+        } else {
+          resultDiv.innerHTML = `<span class="text-red-500">Error: ${result.error}</span>`;
         }
-      });
-    </script>
-  </body>
+      } catch (error) {
+        resultDiv.innerHTML = `<span class="text-red-500">Error: ${error.message}</span>`;
+      }
+    });
+  </script>
+</body>
 </html>
