@@ -3,7 +3,7 @@ import numpy as np
 import os
 from tensorflow.keras.models import load_model
 
-
+# configured the flask backend 
 def create_app(test_config=None):
 
 
@@ -19,40 +19,40 @@ def create_app(test_config=None):
     except OSError:
         pass
     
-    model_path = os.path.join(app.instance_path, 'AI_forecasting_model.keras')
+    model_path = os.path.join(app.instance_path, 'AI_forecasting_model.keras') # Joined the model path to the local project for the keras API to load it for prediction
     print(f"Model path: {model_path}")
 
     model = load_model(model_path)  
 
-    @app.route('/', methods=("GET",))
+    @app.route('/', methods=("GET",)) # Added the HTTP GET method to render the input.html page when the backend server starts
     def welcome():
         return render_template('input.html')
     
     @app.route('/predict', methods=["POST"])
     def predict():
         try:
-            data = request.get_json()
+            data = request.get_json() # User input data recieved as a JSON format
 
-            if not data:
+            if not data: # handling cases when no data is received
                 return jsonify({"error": "No data received"}), 400
 
-            features = data.get('features')
+            features = data.get('features') # Extracting the features from the JSON data
 
-            if not features or len(features) != 5:
+            if not features or len(features) != 5: # Checking if the features are present and have the correct length
                 return jsonify({"error": "Expected 5 input features: [Close, High, Low, Open, Volume]"}), 400
+ 
+            single_input = np.array(features).reshape(1, 5)   # Reshaping the single input to match the model's expected input shape
 
-            single_input = np.array(features).reshape(1, 5)  
+            repeated_sequence = np.repeat(single_input, repeats=30, axis=0)   # Repeating the input to match the model's expected input shape
 
-            repeated_sequence = np.repeat(single_input, repeats=30, axis=0)  
+            model_input = repeated_sequence.reshape(1, 30, 5)  # Reshaping all the user input to match the model's expected input shape
 
-            model_input = repeated_sequence.reshape(1, 30, 5)
+            print(f"Model input shape: {model_input.shape}") # Debugging the input shape
 
-            print(f"Model input shape: {model_input.shape}")
-
-            prediction = model.predict(model_input)
+            prediction = model.predict(model_input)  # Making the prediction using the loaded model
 
             return jsonify({
-                "prediction": prediction.tolist()
+                "prediction": prediction.tolist() # Converting the prediction to a list for JSON serialization
             })
 
         except Exception as e:
